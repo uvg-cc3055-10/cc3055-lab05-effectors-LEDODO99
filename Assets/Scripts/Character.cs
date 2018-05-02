@@ -5,10 +5,13 @@ using UnityEngine.UI;
 
 public class Character : MonoBehaviour {
 
+    public GameObject feet;
+    public LayerMask layerMask;
 
     Rigidbody2D rb2d;
     SpriteRenderer sr;
     Animator anim;
+    Vector3 posicionInicialPersonaje;
     private float speed = 5f;
     private float jumpForce = 250f;
     private bool facingRight = true;
@@ -19,6 +22,7 @@ public class Character : MonoBehaviour {
         rb2d = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
+        posicionInicialPersonaje = new Vector3(transform.position.x, transform.position.y, transform.position.z);
     }
 	
 
@@ -34,7 +38,16 @@ public class Character : MonoBehaviour {
         sr.flipX = !facingRight;
 
         if (Input.GetButtonDown("Jump")) {
-            rb2d.AddForce(Vector2.up*jumpForce);
+            RaycastHit2D raycast = Physics2D.Raycast(feet.transform.position, Vector2.down, 0.1f,layerMask);
+            if (raycast.collider != null)
+                rb2d.AddForce(Vector2.up*jumpForce);
         }
 	}
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.layer==LayerMask.NameToLayer("World"))
+            transform.position = posicionInicialPersonaje;
+        if (collision.gameObject.layer == LayerMask.NameToLayer("EndingZone"))
+            sceneController.instance.endedLevel = true;
+    }
 }
